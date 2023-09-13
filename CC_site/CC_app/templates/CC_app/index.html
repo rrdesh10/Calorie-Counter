@@ -5,11 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+   <!-- chart js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <title></title>
 </head>
 <body>
 
     <div class="container">
+        <div class="row>">
+            <div class="col-md-12">
+                <nav class=" navbar navbar-expand-md">
+                    <span class="navbar-brand"><b>Calorie Counter</b></span>
+                </nav>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-md-9 offset-md-1">
+                <h4>Calorie Goal</h4><br/>
+                    <div class="progress" role="progressbar" aria-label="Info example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0">
+                        <div class="progress-bar bg-info" style="width: 0%"></div>
+                    </div>
+            </div>
+        </div>
+        <br/><br/>
         <div class="row">
             <div class="col-md-12">
                 <form method="POST" class="form-group">
@@ -38,6 +57,7 @@
                         <th>Protein(gm)</th>
                         <th>Fats(gm)</th>
                         <th>Calories(Kcal)</th>
+                        <th>Remove</th>
                     </tr>
                     {% for user in user_food %}
                     <tr>
@@ -46,21 +66,31 @@
                         <td>{{ user.food_consumed.protein}}</td>
                         <td>{{ user.food_consumed.fats}}</td>
                         <td>{{ user.food_consumed.calories}}</td>
+                        <td><a class="btn btn-secondary" href="{% url 'delete' user.id %}">X</a></td>
                     </tr>
                     {% endfor %}
 
                     <tr>
                         <td id="name"><b>Total</b></td>
-                        <td id="totalcarbs"><b></b></td>
-                        <td id="totalprotein"><b></b></td>
-                        <td id="totalfats"><b></b></td>
-                        <td id="totalcalories"><b></b></td>
+                        <td id="totalcarbs"></td>
+                        <td id="totalprotein"></td>
+                        <td id="totalfats"></td>
+                        <td id="totalcalories"></td>
+                        <td></td>
                     </tr>
                 </table>   
             </div>
 
             <div class="col-md-5 offset-1">
-
+                <div class="">
+                    <br/><h4>Today's Breakdown</h4>
+                </div>
+                <div class="card-header text-bg-dark bg-gradient">
+                    <h4>Marconutreint Breakdown</h4>
+                </div>
+                <div class="col-md-12">
+                    <canvas id="chart" width="400" height="350"></canvas>
+                </div>
             </div>
         </div>    
     </div>
@@ -84,11 +114,35 @@
         calories = Math.round(calories);
     }
 
-    document.getElementById('totalcarbs').innerHTML = carbs
-    document.getElementById('totalprotein').innerHTML = protein
-    document.getElementById('totalfats').innerHTML = fats
-    document.getElementById('totalcalories').innerHTML = calories
-    
+    document.getElementById('totalcarbs').innerHTML = '<b>' + carbs + '(gm)' + '</b>'
+    document.getElementById('totalprotein').innerHTML = '<b>' + protein + '(gm)' + '</b>'
+    document.getElementById('totalfats').innerHTML = '<b>' + fats + '(gm)' + '</b>'
+    document.getElementById('totalcalories').innerHTML = '<b>' + calories + '(Kcal)' + '</b>'
+
+    var total = carbs + protein + fats;
+    var carbsPer = Math.round((carbs/total)*100);
+    var proteinPer = Math.round((protein/total)*100);
+    var fatsPer = Math.round((fats/total)*100);
+
+    // progress bar
+    var calPer = (calories/2000) * 100;
+    document.getElementsByClassName("progress-bar")[0].setAttribute("style","width:"+calPer+ "%");
+
+
+    // chart
+
+    var ctx = document.getElementById("chart");
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+        labels: ['Carbs '+carbsPer+"%", 'Protein '+proteinPer+"%", 'Fats '+fatsPer+"%"],
+        datasets: [{
+            label: '',
+            data: [carbsPer, proteinPer, fatsPer],
+            borderWidth: 1
+        }]
+        },
+    });
 
 </script>
 </html>
